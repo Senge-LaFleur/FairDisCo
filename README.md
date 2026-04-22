@@ -141,4 +141,4 @@ All dependencies are installed in the first cell (`!pip install ...`). The envir
 
 ## License
 
-This code is provided for research purposes. Please cite the relevant papers if you use it.# FairDisCo
+This code is provided for research purposes. Please cite the relevant papers if you use it.

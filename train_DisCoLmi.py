@@ -239,10 +239,10 @@ def custom_load(
         val_dir='',
         label = 'low',
         dataset_name = 'fitzpatrick',
-        image_dir='C:\\Users\\asose\\OneDrive\\Desktop\\Senge Research\\datasets\\fitzpatrick17k\\data\\finalfitz17k\\'
+        image_dir='/kaggle/input/datasets/njihsenge/fitzpatrick17k/fitzpatrick17k/data/finalfitz17k'
         ):
     if dataset_name == 'ddi':
-        image_dir = 'C:\\Users\\asose\\OneDrive\\Desktop\\Senge Research\\datasets\\ddidiversedermatologyimages\\'
+        image_dir = '/kaggle/input/datasets/njihsenge/ddidiversedermatologyimages'
 
     val = pd.read_csv(val_dir)
     train = pd.read_csv(train_dir)
