@@ -331,16 +331,15 @@ if __name__ == '__main__':
     print("Starting... \n")
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if dev_mode == "dev":
-        base_dir = '/kaggle/working/FairDisCo/'
         if dataset_name == 'ddi':
-            df = pd.read_csv(base_dir + 'ddi_metadata_code.csv').sample(300)
+            df = pd.read_csv("/kaggle/working/FairDisCo/ddi_metadata_code.csv").sample(300)
         else:
-            df = pd.read_csv(base_dir + "fitzpatrick17k_known_code.csv").sample(1000)
+            df = pd.read_csv("/kaggle/working/FairDisCo/fitzpatrick17k_known_code.csv").sample(1000)
     else:
         if dataset_name == 'ddi':
-            df = pd.read_csv(base_dir + 'ddi_metadata_code.csv')
+            df = pd.read_csv("/kaggle/working/FairDisCo/ddi_metadata_code.csv")
         else:
-            df = pd.read_csv(base_dir + "fitzpatrick17k_known_code.csv")
+            df = pd.read_csv("/kaggle/working/FairDisCo/fitzpatrick17k_known_code.csv")
 
 
     for holdout_set in ["random_holdout"]: # ["expert_select","random_holdout", "a12", "a34","a56", "dermaamin","br"]:
