@@ -1,144 +1,86 @@
-# Modality-Invariant Representation Learning for Fair Skin Disease Classification
+FairDisCo: Fairer AI in Dermatology via Disentanglement Contrastive Learning
+====================================================
 
-This repository contains the implementation of a dual-encoder vision transformer (ViT) architecture for learning modality-invariant representations of skin lesion images. The model is trained on a combination of paired (clinical + dermoscopic) and unpaired datasets, with multi‑objective losses that enforce fairness across Fitzpatrick skin types (FST) and modality invariance.
+![alt text](Images/model_architecture.jpg)
+<p align="center">Diagram of 3  skin disease classifiers: (a) Baseline; (b) Attribute-aware method; (c) Our proposed disentanglement network with contrastive learning (FairDisCo).</p>
 
-## Overview
+This is a PyTorch implementation for [FairDisCo: Fairer AI in Dermatology via Disentanglement Contrastive Learning, ECCV ISIC Workshop 2022][7].
 
-The pipeline:
 
-1. **Data preparation**: Harmonizes seven disease classes from four public datasets (HIBA, Fitzpatrick17k, HAM10000, DermNet). Builds CSV files with labels, image paths, and estimated FST (via ITA index).
-2. **Balanced augmentation**: Oversamples minority classes and FST groups in training splits.
-3. **Model**: Dual‑encoder ViT (clinical & dermoscopic) sharing a projection head. Produces shared embeddings used for classification, skin‑type uniformity, contrastive learning, and mutual information minimization.
-4. **Loss functions**:
-   - Focal loss for classification (γ=2, label smoothing 0.05)
-   - Confusion loss (KL divergence to uniform) for skin‑type fairness
-   - Supervised contrastive loss (SupCon) for class‑wise embedding clustering
-   - Mutual information loss (MSE) between clinical and dermoscopic embeddings of paired images
-5. **Training**: Uses weighted random sampling (class‑balanced), AdamW optimizer with cosine decay schedule, and checkpointing.
-6. **Fairness evaluation**: Computes EOM, PQD, DPM, and FATE metrics on validation and test sets, as well as per‑FST AUROC.
-7. **Ablation studies**: Compares full model against variants without each loss component.
-8. **Visualizations**: Training curves, per‑FST AUROC bar charts, UMAP/t‑SNE of shared embeddings coloured by class, FST, and modality.
+  * [Requirements](#Requirements)
+  * [Data](#Data)
+  * [Training](#training)
+  * [Evaluation](#evaluation)
+  * [Acknowledgements](#acknowledgements)
 
-## Datasets
 
-The model is trained and evaluated on the following datasets (all publicly available):
 
-| Dataset | Modality | Use |
-|---------|----------|-----|
-| **HIBA** (Hospital Italiano de Buenos Aires) | Clinical + Dermoscopic (paired) | Paired training |
-| **Fitzpatrick17k** | Clinical (unpaired) | Unpaired clinical training |
-| **HAM10000** | Dermoscopic (unpaired) | Unpaired dermoscopic training |
-| **DermNet** | Various (unpaired) | External evaluation |
+If you use this code in your research, please consider citing:
 
-### Unified taxonomy (7 classes)
-
-| ID | Class |
-|----|-------|
-| 0 | Melanoma |
-| 1 | Nevus |
-| 2 | Basal Cell Carcinoma |
-| 3 | Actinic Keratosis |
-| 4 | Seborrheic Keratosis |
-| 5 | Squamous Cell Carcinoma |
-| 6 | Other |
-
-### Dataset links
-
-- HIBA: [HIBASkinLesionsDataset](https://www.kaggle.com/datasets/asosenge/hibaskinlesionsdataset-main)
-- Fitzpatrick17k: [Fitzpatrick17k](https://www.kaggle.com/datasets/asosenge/fitzpatrick17k)
-- HAM10000: [HAM10000](https://www.kaggle.com/datasets/asosenge/ham10000)
-- DermNet: [DermNet](https://www.kaggle.com/datasets/shubhamgoel27/dermnet)
-
-### Citations
-
-If you use this code or the datasets, please cite the original sources:
-
-```bibtex
-@article{groh2021fitzpatrick17k,
-  title={Fitzpatrick17k: A diverse dataset for skin cancer detection},
-  author={Groh, Matthew and Badrinarayanan, Varun and Li, Siyuan and others},
-  journal={arXiv preprint arXiv:2106.09374},
-  year={2021}
-}
-
-@article{tschandl2018ham10000,
-  title={The HAM10000 dataset, a large collection of multi-source dermatoscopic images of common pigmented skin lesions},
-  author={Tschandl, Philipp and Rosendahl, Cliff and Kittler, Harald},
-  journal={Scientific data},
-  volume={5},
-  number={1},
-  pages={1--9},
-  year={2018},
-  publisher={Nature Publishing Group}
-}
-
-@inproceedings{benitez2020hiba,
-  title={HIBA skin lesions dataset: A large and diverse dataset for skin cancer classification},
-  author={Benitez, Diego S. and others},
-  booktitle={Iberian Conference on Pattern Recognition and Image Analysis},
-  year={2020}
+```text
+@inproceedings{du2023fairdisco,
+  title={{FairDisCo}: Fairer {ai} in dermatology via disentanglement contrastive learning},
+  author={Du, Siyi and Hers, Ben and Bayasi, Nourhan and Hamarneh, Ghassan and Garbi, Rafeef},
+  booktitle={Computer Vision--ECCV 2022 Workshops: Tel Aviv, Israel, October 23--27, 2022, Proceedings, Part IV},
+  pages={185--202},
+  year={2023},
+  organization={Springer}
 }
 ```
 
-## Architecture
+  <!-- pages = {11125--11132},
+  booktitle = {Proceedings of the Thirty-Fourth AAAI Conference on Artificial Intelligence (AAAI-20)} -->
 
-- **Backbone**: `vit_small_patch16_224` from `timm` (pretrained on ImageNet‑21k)
-- **Projection head**: Linear(384) → BatchNorm1d → GELU → Linear(512) with L2 normalization
-- **Dual encoders**: Clinical and dermoscopic branches share the projection head weights.
-- **Classifier**: Linear(512) → 7 classes
-- **Skin‑type classifier**: Linear(512) → 256 → ReLU → Linear(6)
 
-## Training
+  Requirements
+----------------------
+This code is implemented using Python 3.8.1, PyTorch v1.8.0, CUDA 11.1 and CuDNN 7. 
 
-- **Optimizer**: AdamW (lr=1e-4, weight decay=1e-4)
-- **Scheduler**: Cosine decay with 5‑epoch warmup
-- **Batch size**: 32
-- **Epochs**: 15 (full) or 1 (quick ablation)
-- **Data augmentation**: Random crop, flip, rotation, colour jitter, Gaussian blur, affine, autocontrast, random erasing.
-- **Weighted random sampler**: Class‑balanced (oversampling minority classes).
+```sh
+conda create -n skinlesion python=3.8
+conda activate skinlesion  # activate the environment and install all dependencies
+cd FairDisCo/
+conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
+# or go to https://pytorch.org/get-started/previous-versions/ to find a right command to install pytorch
+pip install -r requirements.txt
+```
 
-## Fairness Metrics
 
-- **EOM** (Equality of Opportunity): 1 − std(per‑FST AUROC)
-- **PQD** (Performance Difference): max(per‑FST AUROC) − min(per‑FST AUROC)
-- **DPM** (Demographic Parity): max(per‑FST prediction rate) − min(per‑FST prediction rate)
-- **FATE**: α·AUROC + (1−α)·EOM (α=0.5)
+Data
+----------------------
+1. Download Fitzpatrick17k dataset by filling the form [here][1]
 
-## Results (summary)
+2. Download Diverse Dermatology Images (DDI) from [here][2]
 
-- **Validation**: AUROC = 0.9605, EOM = 0.9651, FATE = 0.9628
-- **Test (internal)**: AUROC = 0.9656, EOM = 0.9691, FATE = 0.9673
-- **Cross‑dataset (DermNet)**: AUROC = 0.6925
+3. Use [data_play_fitz.ipynb][4] and [data_play_ddi.ipynb][5] to remove unknown skin types, encode disease labels, and generate the weights of reweighting and resampling methods.
 
-Ablation shows that removing any loss component degrades fairness (EOM, FATE), with the full model achieving the best trade‑off.
 
-## Running the code
 
-This code is designed to run on **Kaggle** (GPU T4 or better). To reproduce:
+Training
+---------------------
+We have 6 models: baseline (BASE), attribute-aware (ATRB), resampling (RESM), reweighting (REWT), FairDisCo, FairDisCo without contrastive loss. Train one of those models as
+```sh
+python -u train_BASE.py 20 full fitzpatrick BASE
+# or
+python -u train_BASE.py 15 full ddi BASE
+```
 
-1. Upload the notebook to a Kaggle notebook.
-2. Add the required datasets as inputs (see links above).
-3. Set your HuggingFace token as a Kaggle secret (`HF_TOKEN`) to avoid download rate limits.
-4. Run all cells sequentially.
+Evaluation
+---------------------
+Use [multi_evaluate.ipynb][3]
 
-The notebook will:
-- Download and cache the ViT backbone (first run only).
-- Build CSV files in `/kaggle/working/csvs`.
-- Train the model and save checkpoints in `/kaggle/working/checkpoints`.
-- Generate evaluation figures and tables in `/kaggle/working/results`.
 
-To run a quick test (1 epoch), set `QUICK = True` in the ablation cell.
 
-## Requirements
+Acknowledgements
+----------------
 
-All dependencies are installed in the first cell (`!pip install ...`). The environment includes:
+* This code began with [mattgroh/fitzpatrick17k][6]. We thank the developers for building the Fitzpatrick17k dataset and providing the baseline.
 
-- PyTorch, torchvision
-- timm, einops
-- scikit‑learn, umap‑learn, seaborn, matplotlib
-- pandas, tqdm, Pillow
-- shap, captum
 
-## License
-
-This code is provided for research purposes. Please cite the relevant papers if you use it.
+[1]: https://github.com/mattgroh/fitzpatrick17k
+[2]: https://ddi-dataset.github.io/index.html#dataset
+[3]: https://github.com/siyi-wind/FairDisCo/blob/main/multi_evaluate.ipynb
+[4]: https://github.com/siyi-wind/FairDisCo/blob/main/data_play_fitz.ipynb
+[5]: https://github.com/siyi-wind/FairDisCo/blob/main/data_play_ddi.ipynb
+[6]: https://github.com/mattgroh/fitzpatrick17k
+[7]: https://arxiv.org/abs/2208.10013
