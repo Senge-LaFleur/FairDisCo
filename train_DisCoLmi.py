@@ -570,7 +570,10 @@ if __name__ == '__main__':
                                     "fitzpatrick": flatten(fitzpatrick_list),
                                     "prediction_probability": flatten(p_list),
                                     "prediction": flatten(prediction_list)})
-            df_x.to_csv("results_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set),
+            import os
+            save_dir = "/kaggle/working/FairDisCo/"
+            os.makedirs(save_dir, exist_ok=True)
+            df_x.to_csv(os.path.join(save_dir, "results_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set)),
                             index=False)
             print("\n Accuracy: {}  Balanced Accuracy: {} \n".format(acc, balanced_acc))
         print("done")
