@@ -432,8 +432,8 @@ if __name__ == '__main__':
         level = "high"
 
 
-        train_path = "temp_train_{}.csv".format(model_name)
-        test_path = "temp_test_{}.csv".format(model_name)
+        train_path = "/kaggle/working/FairDisCo/temp_train_{}.csv".format(model_name)
+        test_path = "/kaggle/working/FairDisCo/temp_test_{}.csv".format(model_name)
         train.to_csv(train_path, index=False)
         test.to_csv(test_path, index=False)
 
@@ -490,7 +490,7 @@ if __name__ == '__main__':
             torch.save(model_ft.state_dict(), "model_path_{}_{}_{}_{}.pth".format(model_name, n_epochs, label, holdout_set))
             torch.save(model_ft, "model_path_{}_{}_{}_{}.pt".format(model_name, n_epochs, label, holdout_set))
             print("gold")
-            training_results.to_csv("training_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set))
+            training_results.to_csv("/kaggle/working/FairDisCo/training_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set))
 
             model = model_ft.eval()
             loader = dataloaders["val"]
