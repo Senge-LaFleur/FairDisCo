@@ -217,10 +217,10 @@ def custom_load(
         val_dir='',
         label = 'low',
         dataset_name = 'fitzpatrick',
-        image_dir='C:\\Users\\asose\\OneDrive\\Desktop\\Senge Research\\datasets\\fitzpatrick17k\\data\\finalfitz17k\\'
+        image_dir='/kaggle/input/datasets/njihsenge/fitzpatrick17k/fitzpatrick17k/data/finalfitz17k'
         ):
     if dataset_name == 'ddi':
-        image_dir = 'C:\\Users\\asose\\OneDrive\\Desktop\\Senge Research\\datasets\\ddidiversedermatologyimages\\'
+        image_dir = '/kaggle/input/datasets/njihsenge/ddidiversedermatologyimages'
 
     val = pd.read_csv(val_dir)
     train = pd.read_csv(train_dir)
@@ -293,14 +293,14 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if dev_mode == "dev":
         if dataset_name == 'ddi':
-            df = pd.read_csv('ddi_metadata_code.csv').sample(300)
+            df = pd.read_csv('/kaggle/working/FairDisCo/ddi_metadata_code.csv').sample(300)
         else:
-            df = pd.read_csv("fitzpatrick17k_known_code.csv").sample(1000)
+            df = pd.read_csv("/kaggle/working/FairDisCo/fitzpatrick17k_known_code.csv").sample(1000)
     else:
         if dataset_name == 'ddi':
-            df = pd.read_csv('ddi_metadata_code.csv')
+            df = pd.read_csv('/kaggle/working/FairDisCo/ddi_metadata_code.csv')
         else:
-            df = pd.read_csv("fitzpatrick17k_known_code.csv")
+            df = pd.read_csv("/kaggle/working/FairDisCo/fitzpatrick17k_known_code.csv")
 
 
     for holdout_set in ["random_holdout"]: # ["expert_select","random_holdout", "a12", "a34","a56", "dermaamin","br"]:
@@ -393,8 +393,8 @@ if __name__ == '__main__':
         level = "high"
 
 
-        train_path = "temp_train_{}.csv".format(model_name)
-        test_path = "temp_test_{}.csv".format(model_name)
+        train_path = "/kaggle/working/FairDisCo/temp_train_{}.csv".format(model_name)
+        test_path = "/kaggle/working/FairDisCo/temp_test_{}.csv".format(model_name)
         train.to_csv(train_path, index=False)
         test.to_csv(test_path, index=False)
 
@@ -450,7 +450,7 @@ if __name__ == '__main__':
             torch.save(model_ft.state_dict(), "model_path_{}_{}_{}_{}.pth".format(model_name, n_epochs, label, holdout_set))
             torch.save(model_ft, "model_path_{}_{}_{}_{}.pt".format(model_name, n_epochs, label, holdout_set))
             print("gold")
-            training_results.to_csv("training_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set))
+            training_results.to_csv("/kaggle/working/FairDisCo/training_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set))
 
             model = model_ft.eval()
             loader = dataloaders["val"]
@@ -530,7 +530,10 @@ if __name__ == '__main__':
                                     "fitzpatrick": flatten(fitzpatrick_list),
                                     "prediction_probability": flatten(p_list),
                                     "prediction": flatten(prediction_list)})
-            df_x.to_csv("results_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set),
+            import os
+            save_dir = "/kaggle/working/FairDisCo/"                        
+            os.makedirs(save_dir, exist_ok=True)
+            df_x.to_csv(os.path.join(save_dir, "results_{}_{}_{}_{}.csv".format(model_name, n_epochs, label, holdout_set)),
                             index=False)
             print("\n Accuracy: {}  Balanced Accuracy: {} \n".format(acc, balanced_acc))
         print("done")
